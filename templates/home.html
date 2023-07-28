@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plant Disease Detection</title>
+</head>
+<style>
+    body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f2f2f2;
+
+    /* Optional: Set background image size and other properties */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('static/plants_background.jpg')
+}
+
+.popup-container {
+    display: none;
+    position: absolute;
+    z-index: 9999;
+}
+
+.popup {
+    max-width: 400px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+#messageText {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+#okButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    background-color: #007BFF;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+ h1{
+     color : red;
+     text-align: center;
+     font-family: Arial;
+ }
+
+.container {
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.container h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.upload-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: 2px solid #007BFF;
+    border-radius: 5px;
+    background-color: #007BFF;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.upload-btn:hover {
+    background-color: #0056b3;
+}
+
+#imageInput {
+    display: none;
+}
+
+</style>
+<body onload="setupPopup()">
+<div class="container">
+        <h1>Upload an Image to identify wheather plant is affected by disease or not.</h1>
+        <form id="imageForm" enctype="multipart/form-data">
+            <label for="imageInput" class="upload-btn">Choose an Image for plant</label>
+            <input type="file" id="imageInput" name="image" accept="image/*">
+            <input type="button" value="Upload" onclick="uploadImage()" class="upload-btn"/>
+        </form>
+</div>
+    <div class="popup-container" id="popupContainer">
+        <div class="popup">
+            <img src="" width="150" height="150" id="img_show">
+            <p id="messageText"></p>
+            <button id="okButton">OK</button>
+        </div>
+    </div>
+<script>
+ var popupContainer = undefined
+ var okButton = undefined;
+
+function showPopup(message, label) {
+        const messageText = document.getElementById("messageText");
+        messageText.textContent = message;
+        popupContainer.style.display = "flex";
+        const dynamicImage = document.getElementById('img_show');
+        // Set the 'src' attribute to the provided URL
+        var pimg = '';
+        if(label == 'Rust'){
+            pimg = 'static/copper_fungicide.jpg'
+        }
+        else if(label == 'Powdery'){
+            pimg = 'static/sulfur_fungicide.jpg'
+        }
+        else{
+            pimg = 'static/happy.jpg'
+        }
+        dynamicImage.src = pimg;
+}
+
+function hidePopup() {
+        popupContainer.style.display = "none";
+}
+
+function setupPopup(){
+    popupContainer = document.getElementById("popupContainer");
+    okButton = document.getElementById("okButton");
+    okButton.addEventListener("click", hidePopup);
+}
+
+function uploadImage() {
+    const fileInput = document.getElementById('imageInput');
+    const file = fileInput.files[0];
+    if (!file) {
+        alert("Please select a file.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        var str = data.recommendation;
+        showPopup(str, data.disease);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+
+</body>
+</html>
